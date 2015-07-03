@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Workers</title>
+    <style>
+        .field {
+            margin-bottom: 10px;
+        }
+    </style>
+    
+    <script>
+        window.addEventListener("DOMContentLoaded", init);
+       
+        
+        function init(){
+            
+            
+            var btnFindPrimes = document.getElementById("btnFindPrimes");
+            btnFindPrimes.addEventListener("click", onBtnFindPrimesClick);    
+        }
+        function onWorkerMessage(evtArg){
+            var data = evtArg.data;
+            if (data.type === "complete"){
+                document.getElementById("divResult").innerHTML = data.primeCount;
+            } else if (data.type === "progress"){
+                document.getElementById("workProgress").value = data.percentCompleted;
+                console.log(data.percentCompleted);
+            } else {
+                console.log("unknown message", data);
+            }
+        }
+        function onBtnFindPrimesClick(){
+            var start = parseInt(document.getElementById("txtStart").value,10),
+                end = parseInt(document.getElementById("txtEnd").value,10);
+            var worker= new Worker("primeFinderWorker.js");
+            worker.addEventListener("message", onWorkerMessage);
+            worker.postMessage({
+                start : start,
+                end : end
+            });
+        }
+        
+        
+    </script>
+</head>
+<body>
+    <div class="field"><label for="">Start : </label><input type="text" name="" id="txtStart"></div>
+    <div class="field"><label for="">End : </label><input type="text" name="" id="txtEnd"></div>
+    <div class="field"><input type="button" value="Find Primes" id="btnFindPrimes"></div>
+    <div class="field">
+        <div id="divResult"></div>
+    </div>
+    <div class="field">
+        <progress min="0" max="100" value="0" id="workProgress"></progress>
+    </div>
+</body>
+</html>
